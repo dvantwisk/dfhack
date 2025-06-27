@@ -1153,7 +1153,25 @@ static string getTameTag(df::unit *unit) {
     }
 }
 
-string Units::getReadableName(df::historical_figure *hf) {
+template<typename T>
+static string formatReadableName(T *unit_or_hf, const string &prof_name, bool skip_english) {
+    auto visible_name = Units::getVisibleName(unit_or_hf);
+    string native_name = Translation::translateName(visible_name);
+
+    if (native_name.empty())
+        return prof_name;
+
+    if (skip_english)
+        return native_name + ", " + prof_name;
+
+    string english_name = Translation::translateName(visible_name, true, true);
+    if (english_name.empty())
+        return native_name + ", " + prof_name;
+
+    return native_name + " \"" + english_name + "\", " + prof_name;
+}
+
+string Units::getReadableName(df::historical_figure *hf, bool skip_english) {
     CHECK_NULL_POINTER(hf);
     string prof_name = getProfessionName(hf, false, false, true);
 
@@ -1167,11 +1185,10 @@ string Units::getReadableName(df::historical_figure *hf) {
             prof_name = "Ghostly " + prof_name;
     }
 
-    string name = Translation::translateName(getVisibleName(hf));
-    return name.empty() ? prof_name : name + ", " + prof_name;
+    return formatReadableName(hf, prof_name, skip_english);
 }
 
-string Units::getReadableName(df::unit *unit) {
+string Units::getReadableName(df::unit *unit, bool skip_english) {
     CHECK_NULL_POINTER(unit);
     string prof_name = getProfessionName(unit, false, false, true);
 
@@ -1190,8 +1207,7 @@ string Units::getReadableName(df::unit *unit) {
     if (isTame(unit))
         prof_name += " (" + getTameTag(unit) + ")";
 
-    string name = Translation::translateName(getVisibleName(unit));
-    return name.empty() ? prof_name : name + ", " + prof_name;
+    return formatReadableName(unit, prof_name, skip_english);
 }
 
 double Units::getAge(df::unit *unit, bool true_age) {
@@ -2062,6 +2078,14 @@ static int32_t *getActionTimerPointer(df::unit_action *action) {
             return &action->data.dismount.timer;
         case unit_action_type::HoldItem:
             return &action->data.holditem.timer;
+        case unit_action_type::LoadRangedWeapon:
+            return &action->data.loadrangedweapon.movewait;
+        case unit_action_type::ShootRangedWeapon:
+            return &action->data.shootrangedweapon.movewait;
+        case unit_action_type::ThrowItem:
+            return &action->data.throwitem.movewait;
+        case unit_action_type::PostShootRecovery:
+            return &action->data.postshootrecovery.movewait;
         case unit_action_type::LeadAnimal:
         case unit_action_type::StopLeadAnimal:
         case unit_action_type::Jump:
