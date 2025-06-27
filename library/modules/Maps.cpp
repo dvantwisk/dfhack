@@ -354,6 +354,21 @@ df::map_block *Maps::getTileBlock (int32_t x, int32_t y, int32_t z)
 {
     if (!isValidTilePos(x,y,z))
         return NULL;
+
+    int bx = x >> 4;
+    int by = y >> 4;
+
+    auto &block_index = world->map.block_index;
+
+    if (bx < 0 || by < 0 || z < 0 ||
+        block_index == NULL ||
+        block_index[bx] == NULL ||
+        block_index[bx][by] == NULL ||
+        block_index[bx][by][z] == NULL) {
+        std::cerr << "!!!CAUGHT BAD BLOCK ACCESS AT x=" << x << " y=" << y << " z=" << z << "\n";
+        return NULL;
+    }
+
     return world->map.block_index[x >> 4][y >> 4][z];
 }
 
