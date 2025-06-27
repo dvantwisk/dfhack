@@ -233,6 +233,10 @@ namespace DFHack
         /// get the size of the window buffer
         DFHACK_EXPORT bool getWindowSize(int32_t & width, int32_t & height);
 
+        DFHACK_EXPORT int getDepthAt_graphical(int32_t x, int32_t y);
+
+        DFHACK_EXPORT int getDepthAt_graphical_treeless(int32_t x, int32_t y);
+
         namespace Hooks {
             GUI_HOOK_DECLARE(depth_at, int, (int32_t x, int32_t y));
             GUI_HOOK_DECLARE(dwarfmode_view_dims, DwarfmodeDims, ());

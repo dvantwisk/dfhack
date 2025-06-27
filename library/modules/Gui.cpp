@@ -36,6 +36,7 @@ distribution.
 #include "PluginManager.h"
 #include "MiscUtils.h"
 #include "DataDefs.h"
+#include "TileTypes.h"
 
 #include "modules/Job.h"
 #include "modules/Screen.h"
@@ -3021,14 +3022,72 @@ df::coord Gui::getMousePos(bool allow_out_of_bounds)
 
 int getDepthAt_default (int32_t x, int32_t y)
 {
-    auto &main_vp = gps->main_viewport;
-    if (x < 0 || x >= main_vp->dim_x || y < 0 || y >= main_vp->dim_y)
+    df::coord viewport_coord = Gui::getViewportPos();
+    const int32_t vx = viewport_coord.x;
+    const int32_t vy = viewport_coord.y;
+
+    int local_x = x - vx;
+    int local_y = y - vy;
+
+    if (x < vx || x >= gps->viewport[0]->dim_x + vx || y < vy || y >= gps->viewport[0]->dim_y + vy)
         return 0;
-    const size_t num_viewports = gps->viewport.size();
-    const size_t index = (x * main_vp->dim_y) + y;
-    for (size_t depth = 0; depth < num_viewports; ++depth) {
-        if (gps->viewport[depth]->screentexpos_background[index])
+
+    const size_t num_viewports = 9;
+
+    for (int depth = 0; depth < num_viewports; ++depth) {
+        if (gps->viewport[depth]->screentexpos_background[local_x * gps->viewport[depth]->dim_y + local_y]) {
             return depth;
+        }
+    }
+    return 0;
+}
+
+int Gui::getDepthAt_graphical (int32_t x, int32_t y)
+{
+    df::coord viewport_coord = Gui::getViewportPos();
+    const int32_t vx = viewport_coord.x;
+    const int32_t vy = viewport_coord.y;
+
+    int local_x = x - vx;
+    int local_y = y - vy;
+
+    if (x < vx || x >= gps->viewport[0]->dim_x + vx || y < vy || y >= gps->viewport[0]->dim_y + vy)
+        return 0;
+
+    const size_t num_viewports = 9;
+
+    for (int depth = 0; depth < num_viewports; ++depth) {
+        if (gps->viewport[depth]->screentexpos_background[local_x * gps->viewport[depth]->dim_y + local_y]) {
+            return depth;
+        }
+    }
+    return 0;
+}
+
+int Gui::getDepthAt_graphical_treeless(int32_t x, int32_t y)
+{
+    df::coord viewport_coord = Gui::getViewportPos();
+    const int32_t vx = viewport_coord.x;
+    const int32_t vy = viewport_coord.y;
+    const int32_t vz = viewport_coord.z;
+
+
+    int local_x = x - vx;
+    int local_y = y - vy;
+
+    if (x < vx || x >= gps->viewport[0]->dim_x + vx || y < vy || y >= gps->viewport[0]->dim_y + vy)
+        return 0;
+
+    const size_t num_viewports = 9;
+
+    for (int depth = 0; depth < num_viewports; ++depth) {
+        if (gps->viewport[depth]->screentexpos_background[local_x * gps->viewport[depth]->dim_y + local_y]) {
+            int32_t tti = (int32_t)*Maps::getTileType(df::coord(x, y, vz - depth));
+            if (tti < 71 || tti > 226) {
+            //&& tileMaterial(*Maps::getTileType(df::coord(x, y, vz - depth))) != df::enums::tiletype_material::tiletype_material::TREE) {
+                return depth;
+            }
+        }
     }
     return 0;
 }

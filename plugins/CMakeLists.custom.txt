@@ -1,0 +1,17 @@
+function(dfhack_plugins)
+    add_dfhack_plugin(myplugin)
+    add_dfhack_plugin(graphics_hax)
+    add_dfhack_plugin(tree_shadows)
+    add_dfhack_plugin(waves)
+    add_dfhack_plugin(envextra)
+    add_dfhack_plugin(entity_swap)
+    add_dfhack_plugin(gas_trap)
+endfunction()
+
+target_include_directories(myplugin PRIVATE
+    ${SDL2_INCLUDE_DIRS}
+)
+
+target_include_directories(tree_shadows PRIVATE
+    ${SDL2_INCLUDE_DIRS}
+)
